@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Unli Letchon Food Menu</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        #menuSection {
+            display: none;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .search {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            padding: 8px;
+            flex: 1;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Food Menu</h1>
+
+    <!-- Load Menu Button -->
+    <button onclick="loadFoods()">Load Menu</button>
+
+    <!-- Menu -->
+    <div id="menuSection">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>FOOD</th>
+                    <th>PRICE</th>
+                </tr>
+            </thead>
+
+            <tbody id="foodList"></tbody>
+        </table>
+
+        <!-- Search -->
+        <div class="search">
+            <input
+                type="number"
+                id="foodId"
+                placeholder="ID"
+            >
+
+            <button onclick="searchFood()">
+                Search
+            </button>
+        </div>
+
+        <!-- Individual Food -->
+        <div id="result"></div>
+
+    </div>
+
+
+    <script>
+
+        // Load the menu
+        async function loadFoods() {
+
+            const response = await fetch("/api/foods");
+            const foods = await response.json();
+
+            const list = document.getElementById("foodList");
+            const menu = document.getElementById("menuSection");
+
+            list.innerHTML = "";
+
+            foods.forEach(food => {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${food.id}</td>
+                    <td>${food.name}</td>
+                    <td>₱${food.price}</td>
+                `;
+
+                list.appendChild(row);
+            });
+
+            // Show menu after clicking Load Menu
+            menu.style.display = "block";
+        }
+
+
+        // Search individual food
+        async function searchFood() {
+
+            const id = document.getElementById("foodId").value;
+            const result = document.getElementById("result");
+
+            if (!id) {
+                result.style.display = "block";
+                result.textContent = "Please enter a food ID.";
+                return;
+            }
+
+            const response = await fetch(`/api/foods/${id}`);
+
+            result.style.display = "block";
+
+            if (!response.ok) {
+                result.textContent = "Food not found.";
+                return;
+            }
+
+            const food = await response.json();
+
+            result.innerHTML = `
+                <strong>ID:</strong> ${food.id}<br>
+                <strong>Food:</strong> ${food.name}<br>
+                <strong>Price:</strong> ₱${food.price}
+            `;
+        }
+
+    </script>
+
+</body>
+
+</html>
